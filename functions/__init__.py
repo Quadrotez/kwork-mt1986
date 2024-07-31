@@ -1,6 +1,6 @@
 import os
 
-from functions import init
+from functions import init, sending, console_default
 from variables import *
 
 print()

@@ -1,4 +1,6 @@
+import json
 import os
+from pathlib import Path
 import sqlite3
 from configparser import ConfigParser
 from variables import *
@@ -19,7 +21,6 @@ def config():
 после чего вы всегда сможете изменить значения в файле {config_path}''')
         l_config['GENERAL']['API_ID'] = input('API-ID: ')
         l_config['GENERAL']['API_HASH'] = input('API-HASH: ')
-        l_config['GENERAL']['DEFAULT'] = '0'
         l_config.write(open(config_path, 'w', encoding=encoding))
 
         print('Спасибо!')
@@ -28,9 +29,9 @@ def config():
 def session(name_sess):
     (l_config := ConfigParser()).read(config_path, encoding=encoding)
 
-    app = Client(name=session_path.format(name_sess).rpartition('.')[0], api_id=l_config['GENERAL']['API_ID'],
-                 api_hash=l_config['GENERAL']['API_HASH'])
+    os.makedirs(f'{sessions_path}/{name_sess}', exist_ok=True)
 
+    app = client(name_sess, just_app=True)
     app.connect()
 
     while True:
@@ -62,9 +63,16 @@ def session(name_sess):
                     password = input("Введите пароль: ")
 
     app.disconnect()
-    if input('Хотели бы вы использовать эту сессию по умолчанию? (y/n): ').lower() == 'y':
-        l_config['GENERAL']['DEFAULT'] = name_sess
-        l_config.write(open(config_path, 'w', encoding=encoding))
+
+    open(config_sending_path.format(name_sess), 'w', encoding=encoding).write('')
+
+    (config_sending := ConfigParser()).read(config_sending_path, encoding=encoding)
+
+    config_sending.add_section('GENERAL')
+    config_sending['GENERAL']['TEXT'] = 'TEXT'
+    config_sending['GENERAL']['CHATS'] = json.dumps([])
+    config_sending['GENERAL']['DELAY'] = '20'
+    config_sending.write(open(config_sending_path.format(name_sess), 'w', encoding=encoding))
 
 
 def database():
@@ -88,10 +96,13 @@ def proxy_dict():
         return
 
 
-def client(name_sess: str):
+def client(name_sess: str, just_app: bool = False):
     (l_config := ConfigParser()).read(config_path, encoding=encoding)
-    app = Client(name=session_path.format(name_sess).rpartition('.')[0], api_id=l_config['GENERAL']['API_ID'], api_hash=l_config['GENERAL']['API_HASH'],
-                 device_model=device_model, proxy=proxy_dict())
+    app = Client(name=session_path.format(name_sess).rpartition('.')[0], api_id=l_config['GENERAL']['API_ID'],
+                 api_hash=l_config['GENERAL']['API_HASH'], device_model=device_model, proxy=proxy_dict())
+
+    if just_app:
+        return app
 
     try:
         app.connect(), app.get_me(), app.disconnect()
@@ -100,6 +111,8 @@ def client(name_sess: str):
     except AuthKeyUnregistered:
         print('Сессия не валидна!')
         app.disconnect() if not app.is_connected else None
+        Path('{0}.{1}'.format(session_path.format(name_sess).rpartition('.')[0],
+                              'session-journal')).unlink(missing_ok=True)
         os.remove(session_path.format(name_sess))
 
         return
