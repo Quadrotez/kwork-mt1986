@@ -28,7 +28,7 @@ def config():
 def session(name_sess):
     (l_config := ConfigParser()).read(config_path, encoding=encoding)
 
-    app = Client(session_path.format(name_sess), api_id=l_config['GENERAL']['API_ID'],
+    app = Client(name=session_path.format(name_sess).rpartition('.')[0], api_id=l_config['GENERAL']['API_ID'],
                  api_hash=l_config['GENERAL']['API_HASH'])
 
     app.connect()
@@ -90,11 +90,12 @@ def proxy_dict():
 
 def client(name_sess: str):
     (l_config := ConfigParser()).read(config_path, encoding=encoding)
-    app = Client(name='.'.join(name_sess.split('.')[-1]), api_id=l_config['GENERAL']['API_ID'], api_hash=l_config['GENERAL']['API_HASH'],
+    app = Client(name=session_path.format(name_sess).rpartition('.')[0], api_id=l_config['GENERAL']['API_ID'], api_hash=l_config['GENERAL']['API_HASH'],
                  device_model=device_model, proxy=proxy_dict())
 
     try:
         app.connect(), app.get_me(), app.disconnect()
+        return app
 
     except AuthKeyUnregistered:
         print('Сессия не валидна!')

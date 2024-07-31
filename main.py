@@ -5,23 +5,17 @@ from variables import *
 from pyrogram import Client, types
 
 while True:
-    while True:
-        name_sess = input('Введите имя для вашей сессии: ')
+    name_sess = input('Введите имя для вашей сессии: ')
 
-        if not os.path.exists(session_path.format(name_sess)):
-            init.session(name_sess)
+    if not os.path.exists(session_path.format(name_sess)):
+        init.session(name_sess)
 
-        else:
+    else:
+        app = init.client(name_sess)
+
+        if app:
             break
 
-    app = init.client(name_sess)
 
-    if app:
-        break
-
-
-app.connect()
-app.send_message('me', 'Hi')
-app.send_dice()
-
-print('Ok')
+while True:
+    func = input('./ ')

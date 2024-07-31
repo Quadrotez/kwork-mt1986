@@ -6,3 +6,5 @@ sessions/*
 
 config.ini
 db.db
+
+test.py
