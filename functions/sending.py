@@ -11,7 +11,7 @@ from functions import console_default
 from variables import *
 from pyrogram import Client
 from pyrogram.errors import PasswordHashInvalid
-from pyrogram.errors.exceptions.bad_request_400 import PhoneCodeInvalid, PeerIdInvalid
+from pyrogram.errors.exceptions.bad_request_400 import PhoneCodeInvalid, PeerIdInvalid, UsernameInvalid
 from pyrogram.errors.exceptions.not_acceptable_406 import PhoneNumberInvalid
 from pyrogram.errors.exceptions.unauthorized_401 import SessionPasswordNeeded, AuthKeyUnregistered
 
@@ -21,15 +21,15 @@ async def run(name_sess: str, config_sending: ConfigParser, app: Client):
 
     running = True
 
-    def stop(event: keyboard.KeyboardEvent):
+    def stop():
         nonlocal running
-        if event.name == stop_key:
-            console_default.cprint('Конец')
-            console_default.remove()
-            running = False
-            return
+        keyboard.remove_hotkey(stop_key)
+        console_default.cprint('Конец')
+        console_default.remove()
+        running = False
+        return
 
-    keyboard.on_press(stop)
+    keyboard.add_hotkey(stop_key, stop)
 
     async with app:
 
@@ -39,7 +39,12 @@ async def run(name_sess: str, config_sending: ConfigParser, app: Client):
             delay = int(config_sending['GENERAL']['DELAY'])
 
             for chat in chats:
+                old_chat = chat
                 try:
+                    if '\\' in chat or '/' in chat:
+                        chat = chat.split('/')[-1]
+
+                    chat = (await app.get_chat(chat)).id
                     if config_sending['GENERAL'].get('PHOTO'):
                         photo_path = config_sending['GENERAL']['PHOTO']
                         if not os.path.exists(photo_path):
@@ -54,8 +59,8 @@ async def run(name_sess: str, config_sending: ConfigParser, app: Client):
                     else:
                         await app.send_message(chat, text)
 
-                except PeerIdInvalid:
-                    print(f'Чат не обнаружен: {chat}')
+                except (PeerIdInvalid, UsernameInvalid):
+                    print(f'Чат не обнаружен: {old_chat} ({chat})')
                     pass
 
             end_time = time.time() + delay
