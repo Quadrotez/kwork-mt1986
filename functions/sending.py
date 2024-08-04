@@ -14,6 +14,7 @@ from pyrogram.errors import PasswordHashInvalid
 from pyrogram.errors.exceptions.bad_request_400 import PhoneCodeInvalid, PeerIdInvalid, UsernameInvalid
 from pyrogram.errors.exceptions.not_acceptable_406 import PhoneNumberInvalid
 from pyrogram.errors.exceptions.unauthorized_401 import SessionPasswordNeeded, AuthKeyUnregistered
+from pyrogram.types import InputMediaPhoto
 
 
 async def run(name_sess: str, config_sending: ConfigParser, app: Client):
@@ -45,14 +46,19 @@ async def run(name_sess: str, config_sending: ConfigParser, app: Client):
 
                     chat = (await app.get_chat(chat)).id
                     if config_sending['GENERAL'].get('PHOTO'):
-                        photo_path = config_sending['GENERAL']['PHOTO']
-                        if not os.path.exists(photo_path):
-                            print(f'Путь к фото некорректный! {photo_path}')
+                        photo_paths = config_sending['GENERAL']['PHOTO'].split(' ')
 
-                        else:
-                            await app.send_photo(chat,
-                                                 photo=BytesIO(open(photo_path, 'rb').read()),
-                                                 caption=text, parse_mode=enums.ParseMode.MARKDOWN)
+                        c = False
+                        result_photos = []
+                        for i in photo_paths:
+                            if not c:
+                                c = True
+                                result_photos.append(InputMediaPhoto(BytesIO(open(i, 'rb').read()), caption=text,
+                                                                     parse_mode=enums.ParseMode.MARKDOWN))
+                            else:
+                                result_photos.append(InputMediaPhoto(BytesIO(open(i, 'rb').read())))
+                        await app.send_media_group(chat,
+                                                   media=result_photos)
 
                     else:
                         await app.send_message(chat, text, parse_mode=enums.ParseMode.MARKDOWN)
