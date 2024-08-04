@@ -32,7 +32,6 @@ async def run(name_sess: str, config_sending: ConfigParser, app: Client):
     keyboard.add_hotkey(stop_key, stop)
 
     async with app:
-
         while running:
             chats = json.loads(config_sending['GENERAL']['CHATS'])
             text = config_sending['GENERAL']['TEXT'].replace(r'\n', '\n')
