@@ -18,7 +18,7 @@ while True:
 
     app = init.client(name_sess)
 
-    (config_sending := ConfigParser()).read(config_sending_path.format(name_sess, encoding=encoding))
+    (config_sending := ConfigParser()).read(config_sending_path.format(name_sess, encoding=encoding), encoding=encoding)
 
     if app:
         break
@@ -30,7 +30,8 @@ while True:
 
     if func == 'sending':
         console_default.add('sending')
-        asyncio.run(sending.run(name_sess, config_sending, app))
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(sending.run(name_sess, config_sending, app))
 
     elif func == 'set_chats':
         console_default.add('set_chats')

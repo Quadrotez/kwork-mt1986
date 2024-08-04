@@ -72,6 +72,7 @@ def session(name_sess):
     config_sending['GENERAL']['TEXT'] = 'TEXT'
     config_sending['GENERAL']['CHATS'] = json.dumps([])
     config_sending['GENERAL']['DELAY'] = '20'
+    config_sending['GENERAL']['PHOTO'] = ''
     config_sending.write(open(config_sending_path.format(name_sess), 'w', encoding=encoding))
 
 
