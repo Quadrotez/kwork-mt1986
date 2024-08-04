@@ -9,7 +9,7 @@ import keyboard
 
 from functions import console_default
 from variables import *
-from pyrogram import Client
+from pyrogram import Client, enums
 from pyrogram.errors import PasswordHashInvalid
 from pyrogram.errors.exceptions.bad_request_400 import PhoneCodeInvalid, PeerIdInvalid, UsernameInvalid
 from pyrogram.errors.exceptions.not_acceptable_406 import PhoneNumberInvalid
@@ -52,11 +52,10 @@ async def run(name_sess: str, config_sending: ConfigParser, app: Client):
                         else:
                             await app.send_photo(chat,
                                                  photo=BytesIO(open(photo_path, 'rb').read()),
-                                                 caption=text)
-
+                                                 caption=text, parse_mode=enums.ParseMode.MARKDOWN)
 
                     else:
-                        await app.send_message(chat, text)
+                        await app.send_message(chat, text, parse_mode=enums.ParseMode.MARKDOWN)
 
                 except (PeerIdInvalid, UsernameInvalid):
                     print(f'Чат не обнаружен: {old_chat} ({chat})')
