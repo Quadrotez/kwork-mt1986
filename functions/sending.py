@@ -17,7 +17,8 @@ from pyrogram.errors.exceptions.unauthorized_401 import SessionPasswordNeeded, A
 from pyrogram.types import InputMediaPhoto
 
 
-async def run(name_sess: str, config_sending: ConfigParser, app: Client):
+async def run(name_sess: str, app: Client):
+    (config_sending := ConfigParser()).read(config_sending_path.format(name_sess, encoding=encoding), encoding=encoding)
     console_default.cprint(f'Начало! Чтобы остановить рассылку, нажмите {stop_key}')
 
     running = True

@@ -21,6 +21,7 @@ while True:
     (config_sending := ConfigParser()).read(config_sending_path.format(name_sess, encoding=encoding), encoding=encoding)
 
     if app:
+
         break
 
 
@@ -31,7 +32,7 @@ while True:
     if func == 'sending':
         console_default.add('sending')
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(sending.run(name_sess, config_sending, app))
+        loop.run_until_complete(sending.run(name_sess, app))
 
     elif func == 'set_chats':
         console_default.add('set_chats')
@@ -43,6 +44,9 @@ while True:
 
             if chat == 'all':
                 break
+
+            if not chat.startswith('https://t.me/'):
+                chat = 'https://t.me/{}'.format(chat)
 
             chats_sending.append(chat)
 
